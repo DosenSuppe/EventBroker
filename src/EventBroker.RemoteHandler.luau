@@ -13,7 +13,7 @@ export type RemoteHandler = {
 	Logger: any,
 	Validator: any,
 	RateLimit: any,
-	remoteMiddlewares: {[RemoteEvent | RemoteFunction]: {(player: Player, logIndex: number, remoteObject: RemoteEvent | RemoteFunction, ...any) -> boolean}}
+	remoteMiddlewares: {[RemoteEvent | RemoteFunction]: {(player: Player, logIndex: number, ...any) -> boolean}}
 } & typeof(RemoteHandler)
 
 
@@ -40,7 +40,7 @@ local function HandleRemoteCall(
 	pForceLogging: boolean?,
 	...: any
 ): any?
-	
+
 	if (self.RateLimit:CheckRateLimit(pSender.UserId)) then
 		local logId: string = self.Logger:GenerateLogId()
 
@@ -78,11 +78,11 @@ local function HandleRemoteCall(
 	}
 
 	local index = self.Logger:AddLogEntry(logEntry)
-	
+
 	-- Execute middleware chain for this specific remote
 	local middlewares = self.remoteMiddlewares[pRemoteObject] or {}
 	for _, middleware in middlewares do
-		local shouldContinue = middleware(pSender, index, pRemoteObject, ...)
+		local shouldContinue = middleware(pSender, index, ...)
 		if not shouldContinue then
 			self.Logger:AddMessage(index, {
 				Type = "Warning",
@@ -92,7 +92,7 @@ local function HandleRemoteCall(
 			return nil
 		end
 	end
-	
+
 	if (pParamlist) then
 		logEntry.EventLogs = self.Validator:CheckParamlist(pParamlist, givenParams)
 
@@ -141,7 +141,7 @@ RemoteHandler.RegisterRemoteEvent = function(
 	pParamlist: {string}?, 
 	pForceLogging: boolean?
 ): nil
-	
+
 	pRemoteEvent.OnServerEvent:Connect(function(pSender: Player, ...)
 		HandleRemoteCall(self, pRemoteEvent, pSender, pCallback, pParamlist, pForceLogging, ...)
 	end)
@@ -159,7 +159,7 @@ RemoteHandler.RegisterRemoteFunction = function(
 	pParamlist: {string}?, 
 	pForceLogging: boolean?
 ): nil
-	
+
 	pRemoteFunction.OnServerInvoke = function(pSender: Player, ...): any
 		return HandleRemoteCall(self, pRemoteFunction, pSender, pCallback, pParamlist, pForceLogging, ...)
 	end
@@ -198,19 +198,19 @@ function RemoteHandler.RemoveMiddleware(
 	if not middlewares then
 		return nil
 	end
-	
+
 	for i, existingMiddleware in middlewares do
 		if existingMiddleware == middleware then
 			table.remove(middlewares, i)
 			break
 		end
 	end
-	
+
 	-- Clean up empty middleware array
 	if #middlewares == 0 then
 		self.remoteMiddlewares[remoteObject] = nil
 	end
-	
+
 	return nil
 end
 

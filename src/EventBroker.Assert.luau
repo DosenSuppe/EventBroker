@@ -27,7 +27,7 @@ function Assert.AssertInList(self: Assert, pLogId: number, pElement: any, pList:
 
 	self.Logger:AddMessage(pLogId, {
 		Type = "Error",
-		Message = `WARNING: element '{tostring(pElement)}' not in list!`
+		Message = `Element '{tostring(pElement)}' not in list!`
 	})
 
 	return false
@@ -50,7 +50,7 @@ function Assert.AssertInRange(self: Assert, pLogId: number, pValue: number, pMin
 	if not inRange then
 		self.Logger:AddMessage(pLogId, {
 			Type = "Error",
-			Message = pFailMessage or `ERROR: Value {tostring(pValue)} not in range [{pMin}, {pMax}].`
+			Message = pFailMessage or `Value {tostring(pValue)} not in range [{pMin}, {pMax}].`
 		})
 	end
 

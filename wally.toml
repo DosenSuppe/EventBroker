@@ -1,6 +1,6 @@
 [package]
 name = "dosensuppe/eventbroker"
-version = "1.0.2"
+version = "2.0.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 exclude = ["examples", "examples/**"]
@@ -10,6 +10,6 @@ include = [
     "default.project.json",
     "wally.toml",
     "wally.lock",
-    "LICENSE.md",
+    "LICENSE",
     "README.md",
 ]

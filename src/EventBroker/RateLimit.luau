@@ -12,28 +12,28 @@ RateLimit.New = function(config: any): RateLimit
 	return setmetatable({
 		config = config,
 		playerRateLimits = {}
-	}, RateLimit) :: RateLimit
+	} :: RateLimit, RateLimit)
 end
 
 function RateLimit.CheckRateLimit(self: RateLimit, pUserId: number): boolean
 	local currentTime = os.time()
 	local playerLimit = self.playerRateLimits[pUserId]
 
-	if not playerLimit or currentTime >= playerLimit.resetTime then
+	if (not playerLimit or currentTime >= playerLimit.resetTime) then
 		self.playerRateLimits[pUserId] = {
 			count = 1,
 			resetTime = currentTime + self.config.rateLimitWindow
 		}
-		return false -- Not rate limited
+		return false
 	end
 
 	playerLimit.count += 1
 
-	if playerLimit.count > self.config.rateLimitMaxRequests then
-		return true -- Rate limited
+	if (playerLimit.count > self.config.rateLimitMaxRequests) then
+		return true
 	end
 
-	return false -- Not rate limited
+	return false
 end
 
 function RateLimit.GetRateLimitStats(self: RateLimit): {rateLimitedUsers: number}

@@ -1,0 +1,11 @@
+{
+  "name": "EventBroker",
+  "tree": {
+    "$className": "DataModel",
+    "ServerStorage": {
+      "EventBroker": {
+        "$path": "src/EventBroker"
+      }
+    }
+  }
+}

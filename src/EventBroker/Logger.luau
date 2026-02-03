@@ -27,7 +27,7 @@ Logger.New = function(config: any): Logger
 		LogNextIndex = 1,
 		LogCount = 0,
 		UsedLogIds = {}
-	}, Logger) :: Logger
+	} :: Logger, Logger)
 end
 
 --[[

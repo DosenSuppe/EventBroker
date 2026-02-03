@@ -15,7 +15,7 @@ type Assert = {
 function Assert.New(logger: any): Assert
 	return setmetatable({
 		Logger = logger
-	}, Assert) :: Assert
+	} :: Assert, Assert)
 end
 
 function Assert.AssertInList(self: Assert, pLogId: number, pElement: any, pList: {any}): boolean
@@ -33,11 +33,11 @@ function Assert.AssertInList(self: Assert, pLogId: number, pElement: any, pList:
 	return false
 end
 
-function Assert.AssertTrue(self: Assert, pLogId: number, pTrueValue: boolean, pFailMessage: string?): boolean
-	if not pTrueValue then
+function Assert.Assert(self: Assert, pLogId: number, pTrueValue: boolean, pFailMessage: string?): boolean
+	if not (pTrueValue) then
 		self.Logger:AddMessage(pLogId, {
 			Type = "Error",
-			Message = pFailMessage or "Value is not false!"
+			Message = pFailMessage or "Assert failed!"
 		})
 	end
 

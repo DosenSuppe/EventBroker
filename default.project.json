@@ -1,9 +1,6 @@
 {
   "name": "EventBroker",
   "tree": {
-    "$className": "DataModel",
-    "EventBroker": {
-        "$path": "EventBroker"
-      }
+    "$path": "EventBroker"
   }
 }

@@ -88,7 +88,7 @@ local function HandleRemoteCall(
 		local hasRun, shouldContinue: boolean | string = pcall(middleware, pSender, id, ...)
 
 		if not (hasRun) then
-			self.Logger:AddMEssage(id, {
+			self.Logger:AddMessage(id, {
 				Type = "Error",
 				Message = `Middleware experienced an error during execution: {tostring(shouldContinue :: string)}`
 			})

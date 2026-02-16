@@ -24,12 +24,15 @@ export type Middleware = Types.Middleware
 local EventBroker = {}
 
 -- Configuration
-EventBroker.maxLogCount = 15_000
-EventBroker.isInit = false
-EventBroker.cleanupInterval = 10
-EventBroker.debuggingMode = game:GetService("RunService"):IsStudio()
-EventBroker.rateLimitWindow = 60
-EventBroker.rateLimitMaxRequests = 100
+EventBroker._maxLogCount = 15_000
+EventBroker._isInit = false
+EventBroker.CleanupInterval = 10
+EventBroker.DebuggingMode = game:GetService("RunService"):IsStudio()
+EventBroker.RateLimitWindow = 60
+EventBroker.RateLimitMaxRequests = 100
+
+-- Delegate Parameter functions
+EventBroker.Parameter = Parameter
 
 -- Create class instances
 local logger = Logger.New(EventBroker)
@@ -40,38 +43,17 @@ local assertModule = Assert.New(logger)
 
 --[[
 	Configure EventBroker settings
-	
-	Parameters:
-		config: {
-			maxLogCount: number?,
-			cleanupInterval: number?,
-			rateLimitWindow: number?,
-			rateLimitMaxRequests: number?,
-			debuggingMode: boolean?
-		}
-		
-	Returns:
-		nil
 ]]
-EventBroker.Configure = function(config: {
-	maxLogCount: number?,
-	cleanupInterval: number?,
-	rateLimitWindow: number?,
-	rateLimitMaxRequests: number?,
-	debuggingMode: boolean?
-	}): nil
+function EventBroker.Configure(pConfig: Types.EventBrokerConfig): nil
 
-	if config.maxLogCount then EventBroker.maxLogCount = config.maxLogCount end
-	if config.cleanupInterval then EventBroker.cleanupInterval = config.cleanupInterval end
-	if config.rateLimitWindow then EventBroker.rateLimitWindow = config.rateLimitWindow end
-	if config.rateLimitMaxRequests then EventBroker.rateLimitMaxRequests = config.rateLimitMaxRequests end
-	if config.debuggingMode ~= nil then EventBroker.debuggingMode = config.debuggingMode end
+	if (pConfig.MaxLogCount) then EventBroker._maxLogCount = pConfig.MaxLogCount end
+	if (pConfig.CleanupInterval) then EventBroker.CleanupInterval = pConfig.CleanupInterval end
+	if (pConfig.RateLimitWindow) then EventBroker.RateLimitWindow = pConfig.RateLimitWindow end
+	if (pConfig.RateLimitMaxRequests) then EventBroker.RateLimitMaxRequests = pConfig.RateLimitMaxRequests end
+	if (pConfig.DebuggingMode) ~= nil then EventBroker.DebuggingMode = pConfig.DebuggingMode end
 
 	return nil
 end
-
--- Delegate Parameter functions
-EventBroker.Parameter = Parameter
 
 -- Delegate Message creation
 function EventBroker.CreateMessage(pMessage: string, pType: LogMessageType): LogMessage
@@ -190,51 +172,59 @@ function EventBroker.AssertStringPattern(pLogId: number, pString: string, pPatte
 	return assertModule:AssertStringPattern(pLogId, pString, pPattern, pFailMessage)
 end
 
--- Combined statistics
-EventBroker.GetStatistics = function(): {
-	totalLogs: number,
-	errorLogs: number,
-	warningLogs: number,
-	rateLimitedUsers: number,
-	eventTypes: {[string]: number}
-	}
+--[[
+	Returns 
+]]
+function EventBroker.GetStatistics(): Types.EventBrokerStatistics
 	local logStats = logger:GetStatistics()
 	local rateLimitStats = rateLimit:GetRateLimitStats()
 
 	return {
-		totalLogs = logStats.TotalLogs,
-		errorLogs = logStats.ErrorLogs,
-		warningLogs = logStats.WarningLogs,
-		rateLimitedUsers = rateLimitStats.rateLimitedUsers,
-		eventTypes = logStats.EventTypes
-	}
+		TotalLogs = logStats.TotalLogs,
+		ErrorLogs = logStats.ErrorLogs,
+		WarningLogs = logStats.WarningLogs,
+		RateLimitedUsers = rateLimitStats.rateLimitedUsers,
+		EventTypes = logStats.EventTypes
+	} :: Types.EventBrokerStatistics
 end
 
-task.spawn(function()
-	if (EventBroker.isInit) then return end
-	EventBroker.isInit = true
 
-	while (true) do
-		task.wait(EventBroker.cleanupInterval)
+--[[
+	Initializes the EventBroker module/ log cleanup.
 
-		local oldLogCount: number = logger:RetrieveLogCount()
-		logger:CheckCleanup()
+	PLEASE UPDATE TO USE THIS WHEN INITIALIZING!
+	INITIALIZING ON "require" WILL BE DEPRECATED SOON!
+]]
+function EventBroker.Initialize(): nil
+	task.spawn(function()
+		if (EventBroker._isInit) then return end
+		EventBroker._isInit = true
 
-		if (EventBroker.debuggingMode) then
-			local newLogCount: number = logger:RetrieveLogCount()
-			local deletedLogs: number = oldLogCount - newLogCount
-			local susLogCount: number = #logger:RetrieveLogsWithInfoCount(3)
+		while (true) do
+			task.wait(EventBroker.cleanupInterval)
 
-			game:GetService("TestService"):Message(([[
-			
-			[EVENT-BROKER]
-					Currently logged events: %d
-					Logs purged since last clean-up: %d
-					Logs with more than 3 infos attached: %d
-					Used log IDs tracked: %d
-			]]):format(newLogCount, deletedLogs, susLogCount, logger:GetUsedLogIdsCount()))
+			local oldLogCount: number = logger:RetrieveLogCount()
+			logger:CheckCleanup()
+
+			if (EventBroker.debuggingMode) then
+				local newLogCount: number = logger:RetrieveLogCount()
+				local deletedLogs: number = oldLogCount - newLogCount
+				local susLogCount: number = #logger:RetrieveLogsWithInfoCount(3)
+
+				game:GetService("TestService"):Message(([[
+				
+				[EVENT-BROKER]
+						Currently logged events: %d
+						Logs purged since last clean-up: %d
+						Logs with more than 3 infos attached: %d
+						Used log IDs tracked: %d
+				]]):format(newLogCount, deletedLogs, susLogCount, logger:GetUsedLogIdsCount()))
+			end
 		end
-	end
-end)
+	end)
+end
+
+-- REMOVE LINE BELOW WHEN MIGRATING TO `EventBroker.Initialize()` !
+if (true) then EventBroker.Initialize() end
 
 return EventBroker

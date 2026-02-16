@@ -42,4 +42,12 @@ export type RegisterInfo = {
 
 export type Callback = (pPlayer: Player, pLogIndex: number, ...any) -> any
 
+export type EventBrokerConfig = {
+	MaxLogCount: number?,
+	CleanupInterval: number?,
+	RateLimitWindow: number?,
+	RateLimitMaxRequests: number?,
+	DebuggingMode: boolean?
+}
+
 return {}

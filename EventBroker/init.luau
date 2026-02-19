@@ -10,6 +10,8 @@ local RateLimit = require(script.RateLimit)
 local RemoteHandler = require(script.RemoteHandler)
 local Assert = require(script.Assert)
 local Parameter = require(script.Parameter)
+local Hook = require(script.Hook)
+local PacketSizeCounter = require(script.Packages.remotepacketsizecounter)
 
 -- Re-export types
 export type LogMessageType = Types.LogMessageType
@@ -20,6 +22,9 @@ export type Parameter = Types.Parameter
 export type RegisterInfo = Types.RegisterInfo
 export type Disconnect = Types.Disconnect
 export type Middleware = Types.Middleware
+export type EventDataLog = Types.EventDataLog
+export type HookCallback = Types.HookCallback
+export type PackageInfo = Types.PackageInfo
 
 local EventBroker = {}
 
@@ -38,7 +43,8 @@ EventBroker.Parameter = Parameter
 local logger = Logger.New(EventBroker)
 local validator = Validator.New(logger)
 local rateLimit = RateLimit.New(EventBroker)
-local remoteHandler = RemoteHandler.New(logger, validator, rateLimit)
+local hookManager = Hook.New()
+local remoteHandler = RemoteHandler.New(logger, validator, rateLimit, hookManager)
 local assertModule = Assert.New(logger)
 
 --[[
@@ -68,7 +74,26 @@ function EventBroker.CreateRegisterInfo(): RegisterInfo
 	return {} :: RegisterInfo
 end
 
+-- Delegate PacketSizeCounter utility
+EventBroker.GetPacketSize = PacketSizeCounter.GetPacketSize
+EventBroker.GetDataByteSize = PacketSizeCounter.GetDataByteSize
+
 -- Delegate to RemoteHandler
+
+--[[
+	Connect a hook that allows you to listen to someone's Network traffic
+]]
+function EventBroker.HookToPlayerEvent(pRemote: RemoteEvent | RemoteFunction, pPlayer: Player, pCallback: (pDataLog: Types.EventDataLog) -> ()): Disconnect
+	return remoteHandler:HookToPlayerEvent(pRemote, pPlayer, pCallback)
+end
+
+--[[
+	Removes all hooks registered for a specific player
+	Useful for cleanup when a player leaves the game
+]]
+function EventBroker.RemovePlayerHooks(pPlayer: Player): number
+	return hookManager:RemovePlayerHooks(pPlayer)
+end
 
 --[[
 	Registers a callback to an Remote-Object with RegisterInfo.
@@ -199,14 +224,16 @@ function EventBroker.Initialize(): nil
 	task.spawn(function()
 		if (EventBroker._isInit) then return end
 		EventBroker._isInit = true
+		
+		print("INITIALIZED")
 
 		while (true) do
-			task.wait(EventBroker.cleanupInterval)
+			task.wait(EventBroker.CleanupInterval)
 
 			local oldLogCount: number = logger:RetrieveLogCount()
 			logger:CheckCleanup()
 
-			if (EventBroker.debuggingMode) then
+			if (EventBroker.DebuggingMode) then
 				local newLogCount: number = logger:RetrieveLogCount()
 				local deletedLogs: number = oldLogCount - newLogCount
 				local susLogCount: number = #logger:RetrieveLogsWithInfoCount(3)

@@ -5,10 +5,7 @@
     "ReplicatedStorage": {
       "$className": "ReplicatedStorage",
       "EventBroker": {
-        "$path": "EventBroker",
-        "Packages": {
-          "$path": "Packages"
-        }
+        "$path": "./EventBroker"
       }
     },
     "ServerScriptService": {

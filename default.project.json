@@ -1,9 +1,6 @@
 {
   "name": "EventBroker",
   "tree": {
-    "$path": "EventBroker",
-    "Packages": {
-      "$path": "Packages"
-    }
+    "$path": "EventBroker"
   }
 }

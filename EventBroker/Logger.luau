@@ -68,9 +68,9 @@ Logger.AddLogEntry = function(self: Logger, logEntry: IRemoteLog): number
 	end
 
 	self.LogHistory[index] = logEntry
-	self.LogNextIndex = (self.LogNextIndex % self.Config.maxLogCount) + 1
+	self.LogNextIndex = (self.LogNextIndex % self.Config._maxLogCount) + 1
 
-	if self.LogCount < self.Config.maxLogCount then
+	if self.LogCount < self.Config._maxLogCount then
 		self.LogCount += 1
 	end
 
@@ -150,10 +150,10 @@ end
 Logger.CheckCleanup = function(self: Logger): nil
 	local removedCount = 0
 
-	while self.LogCount > self.Config.maxLogCount  do
+	while self.LogCount > self.Config._maxLogCount  do
 		
 		-- Find oldest log to remove (simple approach for circular buffer)
-		for i = 1, self.Config.maxLogCount do
+		for i = 1, self.Config._maxLogCount do
 			if self.LogHistory[i] then
 				self:RemoveLogEntry(i)
 				removedCount += 1
@@ -236,7 +236,7 @@ Logger.GetStatistics = function(self: Logger): EventBrokerStatistics
 		EventTypes = {}
 	}
 
-	for i = 1, self.Config.maxLogCount do
+	for i = 1, self.Config._maxLogCount do
 		local log = self.LogHistory[i]
 		if not log then continue end
 

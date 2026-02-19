@@ -1,13 +1,16 @@
 --!strict
 
 local Types = require(script.Parent.Types)
+local PacketSizeCounter = require(script.Parent.Packages.remotepacketsizecounter)
+local Hook = require(script.Parent.Hook)
+
 type LogMessage = Types.LogMessage
 type IRemoteLog = Types.IRemoteLog
 type Middleware = Types.Middleware
 type Parameter = Types.Parameter
 type Callback = Types.Callback
 type Disconnect = Types.Disconnect
-
+type EventDataLog = Types.EventDataLog
 
 local RemoteHandler = {}
 RemoteHandler.__index = RemoteHandler
@@ -16,15 +19,17 @@ export type RemoteHandler = {
 	Logger: any,
 	Validator: any,
 	RateLimit: any,
+	Hook: Hook.Hook,
 	_registeredMiddlewares: {[RemoteEvent | RemoteFunction]: { Middleware }}
 } & typeof(RemoteHandler)
 
 
-RemoteHandler.New = function(pLogger: any, pValidator: any, pRateLimit: any): RemoteHandler
+RemoteHandler.New = function(pLogger: any, pValidator: any, pRateLimit: any, pHook: Hook.Hook?): RemoteHandler
 	return setmetatable({
 		Logger = pLogger,
 		Validator = pValidator,
 		RateLimit = pRateLimit,
+		Hook = pHook or Hook.New(),
 		_registeredMiddlewares = {}
 	} :: RemoteHandler, RemoteHandler)
 end
@@ -124,7 +129,6 @@ local function HandleRemoteCall(
 		end
 	end
 
-
 	-- Execute callback
 	local success, result = pcall(pCallback, pSender, id, ...)
 
@@ -137,9 +141,26 @@ local function HandleRemoteCall(
 		return nil
 	end
 
+	
+
 	if (#logEntry.EventLogs == 0 and not pForceLogging) then
 		self.Logger:RemoveLogEntry(id)
 	end
+
+	-- forward EventDataLog to possible hooks
+	local eventDataLog: EventDataLog = {
+		Response = result,
+		RemoteLog = logEntry,
+		PackageInfo = {
+			EstimatedSize = PacketSizeCounter.GetPacketSize({
+				RunContext = "Server",
+				RemoteType = pRemoteObject.ClassName :: "RemoteEvent" | "RemoteFunction",
+				PacketData = { ... }
+			})
+		}
+	}
+
+	self.Hook:FireAll(eventDataLog)
 
 	return result
 end
@@ -227,6 +248,26 @@ function RemoteHandler.RemoveMiddleware(
 	end
 
 	return nil
+end
+
+--[[
+	Registers a hook to listen to a specific player's network traffic on a remote
+	Returns a disconnect function to remove the hook
+]]
+function RemoteHandler.HookToPlayerEvent(
+	self: RemoteHandler,
+	pRemote: RemoteEvent | RemoteFunction,
+	pPlayer: Player,
+	pCallback: (pDataLog: EventDataLog) -> ()
+): Disconnect
+	return self.Hook:Register(pRemote, pPlayer, pCallback)
+end
+
+--[[
+	Gets the Hook module for direct access if needed
+]]
+function RemoteHandler.GetHook(self: RemoteHandler): Hook.Hook
+	return self.Hook
 end
 
 return RemoteHandler

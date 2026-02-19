@@ -7,6 +7,8 @@ export type LogMessage = {
 	Message: string
 }
 
+-- Type `IRemoteLog` is outdated, use type `RemoteLog` instead!
+--- @deprecated
 export type IRemoteLog = {
 	Type: "RemoteEvent" | "RemoteFunction",
 	EventOrigin: string,
@@ -17,6 +19,19 @@ export type IRemoteLog = {
 	GivenParams: { any },
 	Timestamp: number
 }
+
+export type RemoteLog = IRemoteLog
+export type PackageInfo = {
+	EstimatedSize: number
+}
+
+export type EventDataLog = {
+	PackageInfo: PackageInfo,
+	RemoteLog: RemoteLog,
+	Response: any?
+}
+
+export type HookCallback = (pDataLog: EventDataLog) -> ()
 
 export type Disconnect = () -> ()
 

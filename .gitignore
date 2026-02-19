@@ -1,6 +1,9 @@
 # Project place file
 /EventBroker.rbxlx
 
+Packages/
+Packages/**
+
 # Roblox Studio lock files
 /*.rbxlx.lock
 /*.rbxl.lock

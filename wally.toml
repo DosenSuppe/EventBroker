@@ -3,15 +3,22 @@ name = "dosensuppe/eventbroker"
 version = "2.1.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
-exclude = ["examples", "examples/**"]
+exclude = ["examples", "examples/**", "dev.project.json"]
 include = [
     "default.project.json",
     "EventBroker",
     "EventBroker/",
     "EventBroker/*",
     "EventBroker/**",
+    "Packages",
+    "Packages/",
+    "Packages/*",
+    "Packages/**",
     "wally.toml",
     "wally.lock",
     "LICENSE",
     "README.md",
 ]
+
+[dependencies]
+remotepacketsizecounter = "pysephwasntavailable/remotepacketsizecounter@2.4.1"

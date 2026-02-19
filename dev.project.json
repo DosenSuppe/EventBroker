@@ -1,0 +1,21 @@
+{
+  "name": "EventBroker-Dev",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "EventBroker": {
+        "$path": "EventBroker",
+        "Packages": {
+          "$path": "Packages"
+        }
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "Examples": {
+        "$path": "examples"
+      }
+    }
+  }
+}

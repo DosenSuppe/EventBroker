@@ -11,7 +11,7 @@ local RemoteHandler = require(script.RemoteHandler)
 local Assert = require(script.Assert)
 local Parameter = require(script.Parameter)
 local Hook = require(script.Hook)
-local PacketSizeCounter = require(script.Packages.remotepacketsizecounter)
+local PacketSizeCounter = require(script.Parent.remotepacketsizecounter)
 
 -- Re-export types
 export type LogMessageType = Types.LogMessageType

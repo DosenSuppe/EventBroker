@@ -4,7 +4,7 @@ registry = "test"
 
 [[package]]
 name = "dosensuppe/eventbroker"
-version = "2.1.0"
+version = "2.3.2"
 dependencies = [["remotepacketsizecounter", "pysephwasntavailable/remotepacketsizecounter@2.4.1"]]
 
 [[package]]

@@ -1,7 +1,7 @@
 --!strict
 
 local Types = require(script.Parent.Types)
-local PacketSizeCounter = require(script.Parent.Packages.remotepacketsizecounter)
+local PacketSizeCounter = require(script.Parent.Parent.remotepacketsizecounter)
 local Hook = require(script.Parent.Hook)
 
 type LogMessage = Types.LogMessage
